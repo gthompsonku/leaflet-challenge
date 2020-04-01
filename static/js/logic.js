@@ -19,15 +19,27 @@ function createMap(earthquakes) {
         "Sattelite": satellite
     };
 
+    var faultLines =  new L.LayerGroup();
+
     var overlayMaps = {
+        "Fault Lines": faultLines,
         "Earthquakes": earthquakes
     };
 
     var map = L.map("map", {
         center: [37.0902, -105.7129],
         zoom: 4,
-        layers: [lightmap, earthquakes]
+        layers: [lightmap, earthquakes, faultLines]
     });
+
+    //fault lines -- 
+    d3.json(faultLineURL, function(faultData) {
+        L.geoJson(faultData, {
+            color: "gray"
+        })
+        .addTo(faultLines);
+    });
+
 
     L.control.layers(baseMaps, overlayMaps, {
         collaped: false
@@ -65,7 +77,7 @@ function createMarkers(data) {
             opacity:1,
             fillOpacity: 0.75,
             color: getColor(feature.properties.mag),
-            //fillColor: getColor(feature.properties.mag),
+            fillColor: getColor(feature.properties.mag),
             radius: getMarkerSize(feature.properties.mag)
           });
 
@@ -79,6 +91,7 @@ function createMarkers(data) {
     
     createMap(earthquakes);
 };
+
 
 function getData(url) {
     d3.json(url, function(data) {
@@ -102,5 +115,10 @@ function getMarkerSize(d) {
     return d*4;
 };
 
+
+
 url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 getData(url);
+
+
+faultLineURL ="https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
